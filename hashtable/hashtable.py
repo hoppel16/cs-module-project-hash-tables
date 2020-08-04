@@ -22,7 +22,8 @@ class HashTable:
 
     def __init__(self, capacity):
         self.capacity = capacity
-        self.storage = [0] * capacity
+        self.storage = [None] * capacity
+        self.count = 0
 
 
     def get_num_slots(self):
@@ -44,7 +45,7 @@ class HashTable:
 
         Implement this.
         """
-        return
+        return self.count / self.capacity
 
 
     def fnv1(self, key):
@@ -86,8 +87,22 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
+        cur = self.storage[index]
 
-        self.storage[index] = value
+        if cur is None:
+            self.storage[index] = HashTableEntry(key, value)
+        else:
+            if cur.key is key:
+                cur.value = value
+            while cur.next is not None:
+                if cur.next.key is key:
+                    cur.next.value = value
+                cur = cur.next
+            cur.next = HashTableEntry(key, value)
+
+        self.count += 1
+        if self.get_load_factor() > 0.7:
+            self.resize(self.capacity * 2)
 
 
     def delete(self, key):
@@ -99,12 +114,26 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
+        cur = self.storage[index]
 
-        value = self.storage[index]
-        if value is None:
-            print("No value with that key found")
-            return
-        self.storage[index] = None
+        if cur is not None:
+            if cur.key is key:
+                self.count -= 1
+                self.storage[index] = cur.next
+                if self.get_load_factor() < 0.2:
+                    self.resize(self.capacity / 2)
+                return
+
+            while cur.next is not None:
+                if cur.next.key is key:
+                    self.count -= 1
+                    cur.next = cur.next.next
+                    if self.get_load_factor() < 0.2:
+                        self.resize(self.capacity / 2)
+                    return
+            cur = cur.next
+
+        return None
 
 
     def get(self, key):
@@ -116,8 +145,18 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
+        cur = self.storage[index]
 
-        return self.storage[index]
+        if cur is not None:
+            if cur.key is key:
+                return cur.value
+
+            while cur.next is not None:
+                if cur.next.key is key:
+                    return cur.next.value
+                cur = cur.next
+
+        return None
 
 
     def resize(self, new_capacity):
@@ -127,7 +166,21 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        temp_storage = []
+
+        for entry in self.storage:
+            if entry is None:
+                continue
+            cur = entry
+            while cur is not None:
+                temp_storage.append(cur)
+                cur = cur.next
+
+        self.capacity = new_capacity
+        self.storage = [None] * new_capacity
+
+        for entry in temp_storage:
+            self.put(entry.key, entry.value)
 
 
 
