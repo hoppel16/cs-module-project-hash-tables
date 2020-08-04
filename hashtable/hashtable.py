@@ -22,7 +22,8 @@ class HashTable:
 
     def __init__(self, capacity):
         self.capacity = capacity
-        self.storage = [0] * capacity
+        self.storage = [None] * capacity
+        self.count = 0
 
 
     def get_num_slots(self):
@@ -44,7 +45,7 @@ class HashTable:
 
         Implement this.
         """
-        return
+        return self.count / self.capacity
 
 
     def fnv1(self, key):
@@ -86,8 +87,20 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
+        cur = self.storage[index]
 
-        self.storage[index] = value
+        if cur is None:
+            self.storage[index] = HashTableEntry(key, value)
+        else:
+            if cur.key is key:
+                cur.value = value
+            while cur.next is not None:
+                if cur.next.key is key:
+                    cur.next.value = value
+                cur = cur.next
+            cur.next = HashTableEntry(key, value)
+
+        self.count += 1
 
 
     def delete(self, key):
@@ -99,12 +112,22 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
+        cur = self.storage[index]
 
-        value = self.storage[index]
-        if value is None:
-            print("No value with that key found")
-            return
-        self.storage[index] = None
+        if cur is not None:
+            if cur.key is key:
+                self.count -= 1
+                self.storage[index] = cur.next
+                return
+
+            while cur.next is not None:
+                if cur.next.key is key:
+                    self.count -= 1
+                    cur.next = cur.next.next
+                    return
+            cur = cur.next
+
+        return None
 
 
     def get(self, key):
@@ -116,8 +139,18 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
+        cur = self.storage[index]
 
-        return self.storage[index]
+        if cur is not None:
+            if cur.key is key:
+                return cur.value
+
+            while cur.next is not None:
+                if cur.next.key is key:
+                    return cur.next.value
+                cur = cur.next
+
+        return None
 
 
     def resize(self, new_capacity):
