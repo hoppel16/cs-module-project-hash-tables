@@ -101,6 +101,8 @@ class HashTable:
             cur.next = HashTableEntry(key, value)
 
         self.count += 1
+        if self.get_load_factor() > 0.7:
+            self.resize(self.capacity * 2)
 
 
     def delete(self, key):
@@ -118,12 +120,16 @@ class HashTable:
             if cur.key is key:
                 self.count -= 1
                 self.storage[index] = cur.next
+                if self.get_load_factor() < 0.2:
+                    self.resize(self.capacity / 2)
                 return
 
             while cur.next is not None:
                 if cur.next.key is key:
                     self.count -= 1
                     cur.next = cur.next.next
+                    if self.get_load_factor() < 0.2:
+                        self.resize(self.capacity / 2)
                     return
             cur = cur.next
 
@@ -160,7 +166,21 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        temp_storage = []
+
+        for entry in self.storage:
+            if entry is None:
+                continue
+            cur = entry
+            while cur is not None:
+                temp_storage.append(cur)
+                cur = cur.next
+
+        self.capacity = new_capacity
+        self.storage = [None] * new_capacity
+
+        for entry in temp_storage:
+            self.put(entry.key, entry.value)
 
 
 
