@@ -1,5 +1,17 @@
 def no_dups(s):
-    # Your code here
+    s.strip()
+    words = {}
+
+    clean_sentence_list = []
+
+    for word in s.split():
+        if word in words:
+            words[word] += 1
+            continue
+        words[word] = 1
+        clean_sentence_list.append(word)
+
+    return " ".join(clean_sentence_list)
 
 
 
