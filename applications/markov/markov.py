@@ -13,12 +13,14 @@ for index in range(0, len(words_list) - 1):
     if index + 1 >= len(words_list):
         break
 
+    # Cleans the word up so that it fits into the hash table better
     clean_word = words_list[index].lower()
     if not clean_word.islower():
         continue
     while not clean_word[0].isalnum():
         clean_word = clean_word.replace(clean_word[0], "")
     while not clean_word[-1].isalnum():
+        # Checks if the word is a sentence end and if so doesn't add the next word to its list
         if clean_word[-1] in ".!?":
             is_sentence_end = True
             break
@@ -30,6 +32,7 @@ for index in range(0, len(words_list) - 1):
     if words_list[index] not in markov_chain:
         markov_chain[clean_word] = []
 
+    # Cleans up the next word so quotes and parenthesis don't make it look strange but keeps punctuation
     clean_next_word = words_list[index+1].lower()
     if not clean_next_word.islower():
         continue
